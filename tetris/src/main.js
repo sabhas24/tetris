@@ -10,7 +10,7 @@ const height = 30
 canvas.width = width * blockSize
 canvas.height = height * blockSize
 
-const actualPice={
+const actualPiece={
   'position' : {x:5,y:5},
    'shape'  :[
     [1, 1],
@@ -19,7 +19,7 @@ const actualPice={
 }
 
 
- const board = createBoard(height, width)
+  const board = createBoard(height, width)
 /*const board =[
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -49,7 +49,7 @@ const actualPice={
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,1,1,1,0],
   [0,0,0,0,0,0,0,0,0,0,0,1,1,1,0]
 ]*/
 context.scale(blockSize, blockSize)
@@ -58,20 +58,19 @@ function draw(){
 
   context.fillStyle = 'black';
   context.fillRect(0, 0, width, height);
-  for(let y = 1; y < board.length - 1; y++){
-    for(let x = 1; x < board[y].length - 1; x++){
+  for(let y = 0; y < board.length ; y++){
+    for(let x = 0; x < board[y].length ; x++){
       if(board[y][x] != 0){
-        drawRect(x - 1, y - 1, 'blue');
+        drawRect(x, y, 'blue');
       }
     }
   }
 }
 function drawPiece() {
-
-  actualPice.shape.forEach((row, y) => {
+  actualPiece.shape.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value != 0) {
-        drawRect(actualPice.position.x + x, actualPice.position.y + y, 'red');
+        drawRect(actualPiece.position.x + x, actualPiece.position.y + y, 'red');
       }
     });
   });
@@ -85,7 +84,28 @@ function drawRect(posX, posY, color) {
   context.lineJoin = 'round '
   context.strokeRect(posX , posY, 1, 1);
 }
-
+function checkCollision(deltaX, deltaY){
+  const newX = actualPiece.position.x + deltaX;
+  const newY = actualPiece.position.y + deltaY;
+  
+  return actualPiece.shape.some((row, y) => {
+    return row.some((value, x) => {
+      if (value != 0) {
+        const boardX = newX + x;
+        const boardY = newY + y;
+        
+        // Verificar límites del tablero
+        if (boardX < 0 || boardX >= width || boardY < 0 || boardY >= height) {
+          return true; // Colisión con los límites
+        }
+        
+        // Verificar colisión con piezas existentes
+        return board[boardY][boardX] != 0;
+      }
+      return false;
+    });
+  });
+}
 function createBoard(height, width){
   return   Array(height).fill().map(() => Array(width).fill(0));
 
@@ -98,13 +118,21 @@ function update(){
 document.addEventListener('keydown',(event)=>{
   switch (event.key){
     case 'ArrowLeft':
-    actualPice.position.x-=1
+      if(!checkCollision(-1,0)){
+        actualPiece.position.x-=1
+      }
     break;
     case 'ArrowRight':
-    actualPice.position.x+=1
+      if(!checkCollision(1,0)){
+
+        actualPiece.position.x+=1
+      }
     break;
     case 'ArrowDown':
-    actualPice.position.y+=1
+      if(!checkCollision(0,1)){
+
+        actualPiece.position.y+=1
+      }
     break;
   }
 })
