@@ -1,3 +1,12 @@
+function checkCompleteRows() {
+  for (let y = board.length - 1; y >= 0; y--) {
+    if (board[y].every(cell => cell !== 0)) {
+      board.splice(y, 1);
+      board.unshift(Array(board[0].length).fill(0));
+      y++;
+    }
+  }
+}
 import './style.css'
 
 const canvas = document.querySelector('canvas')
@@ -13,14 +22,14 @@ canvas.height = height * blockSize
 const actualPiece={
   'position' : {x:5,y:5},
    'shape'  :[
-    [1, 1],
-    [1, 1]
+    
+    [1, 1, 1, 1 ,1]
   ]
 }
 
 
-  const board = createBoard(height, width)
-/*const board =[
+ // const board = createBoard(height, width)
+const board =[
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -50,8 +59,8 @@ const actualPiece={
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,1,1,1,0],
-  [0,0,0,0,0,0,0,0,0,0,0,1,1,1,0]
-]*/
+  [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]
+]
 context.scale(blockSize, blockSize)
 
 function draw(){
@@ -84,28 +93,29 @@ function drawRect(posX, posY, color) {
   context.lineJoin = 'round '
   context.strokeRect(posX , posY, 1, 1);
 }
-function checkCollision(deltaX, deltaY){
-  const newX = actualPiece.position.x + deltaX;
-  const newY = actualPiece.position.y + deltaY;
-  
-  return actualPiece.shape.some((row, y) => {
-    return row.some((value, x) => {
-      if (value != 0) {
-        const boardX = newX + x;
-        const boardY = newY + y;
-        
-        // Verificar límites del tablero
-        if (boardX < 0 || boardX >= width || boardY < 0 || boardY >= height) {
-          return true; // Colisión con los límites
-        }
-        
-        // Verificar colisión con piezas existentes
-        return board[boardY][boardX] != 0;
-      }
-      return false;
-    });
-  });
+function checkCollision(deltaX,deltaY){
+  deltaX+=actualPiece.position.x
+  deltaY+=actualPiece.position.y
+   return actualPiece.shape.some((row,y)=>{
+  return row.some((value,x)=>{
+    
+    return (value!=0 &&( y+deltaY >= height|| board[y+deltaY][x+deltaX]!=0))
+  })
+})
 }
+function solidify(){
+  actualPiece.shape.forEach((row,y)=>{
+    row.forEach((value,x)=>{
+      if(value==1){
+        board[actualPiece.position.y+y][actualPiece.position.x+x]=1;
+      }
+    })
+  })  
+  checkCompleteRows();
+  actualPiece.position.x=5;
+  actualPiece.position.y=5;
+}
+
 function createBoard(height, width){
   return   Array(height).fill().map(() => Array(width).fill(0));
 
@@ -119,19 +129,21 @@ document.addEventListener('keydown',(event)=>{
   switch (event.key){
     case 'ArrowLeft':
       if(!checkCollision(-1,0)){
-        actualPiece.position.x-=1
+        actualPiece.position.x-=1;
       }
     break;
     case 'ArrowRight':
       if(!checkCollision(1,0)){
 
-        actualPiece.position.x+=1
+        actualPiece.position.x+=1;
       }
     break;
     case 'ArrowDown':
       if(!checkCollision(0,1)){
 
-        actualPiece.position.y+=1
+        actualPiece.position.y+=1;
+      }else{
+        solidify();
       }
     break;
   }
