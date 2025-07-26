@@ -1,12 +1,4 @@
-function checkCompleteRows() {
-  for (let y = board.length - 1; y >= 0; y--) {
-    if (board[y].every(cell => cell !== 0)) {
-      board.splice(y, 1);
-      board.unshift(Array(board[0].length).fill(0));
-      y++;
-    }
-  }
-}
+import  {PIECES} from './pieces.js'
 import './style.css'
 
 const canvas = document.querySelector('canvas')
@@ -20,11 +12,8 @@ canvas.width = width * blockSize
 canvas.height = height * blockSize
 
 const actualPiece={
-  'position' : {x:5,y:5},
-   'shape'  :[
-    
-    [1, 1, 1, 1 ,1]
-  ]
+  'position' : {x:0,y:0},
+   'shape'  : PIECES[Math.floor(Math.random()*7)]
 }
 
 
@@ -75,6 +64,29 @@ function draw(){
     }
   }
 }
+function leftRotation(){
+  const size=4;
+  const result=Array.from({length:size},()=>Array().fill(0) );
+  for(let i=0;i<size;i++){
+    for(let j=0;j<size;j++){
+      result[i][j]=actualPiece.shape[j][size-1-i]
+    }
+  }
+  actualPiece.shape=result;
+
+}
+function rightRotation(){
+  const size=4;
+  const result=Array.from({length:size},()=>Array().fill(0) );
+  for(let i=0;i<size;i++){
+    for(let j=0;j<size;j++){
+      result[i][j]=actualPiece.shape[size-1-j][i]
+    }
+  }
+  actualPiece.shape=result;
+
+
+}
 function drawPiece() {
   actualPiece.shape.forEach((row, y) => {
     row.forEach((value, x) => {
@@ -103,6 +115,15 @@ function checkCollision(deltaX,deltaY){
   })
 })
 }
+function checkCompleteRows() {
+  for (let y = board.length - 1; y >= 0; y--) {
+    if (board[y].every(cell => cell !== 0)) {
+      board.splice(y, 1);
+      board.unshift(Array(board[0].length).fill(0));
+      y++;
+    }
+  }
+}
 function solidify(){
   actualPiece.shape.forEach((row,y)=>{
     row.forEach((value,x)=>{
@@ -112,8 +133,10 @@ function solidify(){
     })
   })  
   checkCompleteRows();
-  actualPiece.position.x=5;
-  actualPiece.position.y=5;
+  actualPiece.position.x=Math.floor(Math.random()*(width-2));
+  actualPiece.position.y=0
+  actualPiece.shape=PIECES[Math.floor(Math.random()*7)]
+  
 }
 
 function createBoard(height, width){
@@ -145,6 +168,14 @@ document.addEventListener('keydown',(event)=>{
       }else{
         solidify();
       }
+    break;
+    case 'z':
+    leftRotation()
+    if(checkCollision(0,0)){rightRotation()}
+    break;
+    case 'x':
+    rightRotation()
+    if(checkCollision(0,0)){leftRotation()}
     break;
   }
 })
