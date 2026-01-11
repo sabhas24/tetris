@@ -1,58 +1,29 @@
-import  {PIECES} from './pieces.js'
+import { PIECES } from './pieces.js'
 import './style.css'
+import { board } from './board.js'
 
 const canvas = document.querySelector('canvas')
 const context = canvas.getContext('2d')
 
-const blockSize = 20
-const width = 15
-const height = 30
+const blockSize = 30
+const width = 10
+const height = 20
 
 canvas.width = width * blockSize
 canvas.height = height * blockSize
 
-const actualPiece={
+
+context.scale(blockSize, blockSize)
+const gameBoard = new board(height, width, context);
+gameBoard.draw();
+
+/* const actualPiece={
   'position' : {x:0,y:0},
    'shape'  : PIECES[Math.floor(Math.random()*7)]
 }
 
-
- // const board = createBoard(height, width)
-const board =[
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,1,1,1,0],
-  [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]
-]
-context.scale(blockSize, blockSize)
-
-function draw(){
+ *///pasar por parametro height y width
+/* function draw(){
 
   context.fillStyle = 'black';
   context.fillRect(0, 0, width, height);
@@ -63,8 +34,8 @@ function draw(){
       }
     }
   }
-}
-function leftRotation(){
+} */
+/* function leftRotation(){
   const size=4;
   const result=Array.from({length:size},()=>Array().fill(0) );
   for(let i=0;i<size;i++){
@@ -86,8 +57,8 @@ function rightRotation(){
   actualPiece.shape=result;
 
 
-}
-function drawPiece() {
+} */
+/* function drawPiece() {
   actualPiece.shape.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value != 0) {
@@ -96,8 +67,8 @@ function drawPiece() {
     });
   });
 }
-
-function drawRect(posX, posY, color) {
+ */
+/* function drawRect(posX, posY, color) {
   context.fillStyle = color;
   context.fillRect(posX, posY, 1, 1);
   context.strokeStyle = 'white';
@@ -139,10 +110,7 @@ function solidify(){
   
 }
 
-function createBoard(height, width){
-  return   Array(height).fill().map(() => Array(width).fill(0));
 
-}
 function update(){
   draw();
   drawPiece();
@@ -179,4 +147,4 @@ document.addEventListener('keydown',(event)=>{
     break;
   }
 })
-update();
+update(); */
