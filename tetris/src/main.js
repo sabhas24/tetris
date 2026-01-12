@@ -1,4 +1,4 @@
-import { PIECES } from './pieces.js'
+import { Tetromino, tetrominoBag } from './tetrominos.js'
 import './style.css'
 import { board } from './board.js'
 
@@ -16,6 +16,9 @@ canvas.height = height * blockSize
 context.scale(blockSize, blockSize)
 const gameBoard = new board(height, width, context);
 gameBoard.draw();
+const bag = new tetrominoBag();
+const tetromino = new Tetromino(bag.getNextTetromino(), context, canvas);
+tetromino.draw();
 
 /* const actualPiece={
   'position' : {x:0,y:0},

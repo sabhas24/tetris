@@ -20,8 +20,7 @@ export class board {
         this.context.lineWidth = 0.05;
 
         this.context.lineJoin = 'round ';
-        this.context.
-            this.context.strokeRect(x, y, 1, 1);
+        this.context.strokeRect(x, y, 1, 1);
 
     }
     draw() {
@@ -35,6 +34,40 @@ export class board {
                 this.drawSquere(x, y, 'black', 'white');
             }
 
+        }
+    }
+    isInside(x, y) {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+    checkCollision(x, y) {
+        return !this.isInside(x, y) || this.grid[y][x] !== 0;
+    }
+    isRowFull(y) {
+        return this.grid[y].every(cell => cell !== 0);
+    }
+    isEmptyRow(y) {
+        return this.grid[y].every(cell => cell === 0);
+    }
+    clearRow(y) {
+        this.grid[y].fill(0);
+    }
+    moveRowsDown(count, startY) {
+        for (let y = startY + 1; y > count + startY; y++) {
+            this.grid[y].splice(y, 1);
+            this.grid[y].unshift(0);
+        }
+    }
+    collapseRows() {
+        let y = this.height - 1;
+        let contador = 0;
+        while (!this.isEmptyRow(y) && (y >= 0)) {
+            if (this.isRowFull(y)) {
+                this.clearRow(y);
+                contador++;
+            } else if (contador > 0) {
+                this.moveRowsDown(contador, y);
+            }
+            y--;
         }
     }
 }
