@@ -10,8 +10,8 @@ export const TETROMINO_TYPES = {
         initialPosition: { x: 3, y: -1 },
         shape: [
             [new position(0, 1), new position(1, 1), new position(2, 1), new position(3, 1)],
+            [new position(2, 0), new position(2, 1), new position(2, 2), new position(2, 3)],
             [new position(0, 2), new position(1, 2), new position(2, 2), new position(3, 2)],
-            [new position(0, 3), new position(1, 3), new position(2, 3), new position(3, 3)],
             [new position(1, 0), new position(1, 1), new position(1, 2), new position(1, 3)]
         ],
         mainColor: '#00FFFF',      // Cyan
@@ -94,4 +94,36 @@ export const TETROMINO_TYPES = {
         highlight: '#FF8080', // Light red
         shadow: '#800000'     // Dark red
     }
+};
+export const I_WALL_KICKS = {
+    // Rotaciones por la Derecha (Horario)
+    right: [
+        [{ x: 0, y: 0 }, { x: -2, y: 0 }, { x: 1, y: 0 }, { x: -2, y: 1 }, { x: 1, y: -2 }],
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 2, y: 0 }, { x: -1, y: -2 }, { x: 2, y: 1 }],
+        [{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: -1, y: 0 }, { x: 2, y: -1 }, { x: -1, y: 2 }],
+        [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: -2, y: 0 }, { x: 1, y: 2 }, { x: -2, y: -1 }],
+    ],
+    // Rotaciones por la Izquierda (Anti-horario)
+    left: [
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 2, y: 0 }, { x: -1, y: -2 }, { x: 2, y: 1 }],
+        [{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: -1, y: 0 }, { x: 2, y: -1 }, { x: -1, y: 2 }],
+        [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: -2, y: 0 }, { x: 1, y: 2 }, { x: -2, y: -1 }],
+        [{ x: 0, y: 0 }, { x: -2, y: 0 }, { x: 1, y: 0 }, { x: -2, y: 1 }, { x: 1, y: -2 }]
+    ]
+};
+export const OTHER_WALL_KICKS = {
+    // Rotaciones por la Derecha (Horario)
+    right: [
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }],
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }],
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }],
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }]
+    ],
+    // Rotaciones por la Izquierda (Anti-horario)
+    left: [
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }],
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }],
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }],
+        [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 1 }, { x: 1, y: -1 }]
+    ]
 };

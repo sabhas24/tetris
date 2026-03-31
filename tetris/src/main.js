@@ -1,6 +1,6 @@
-import { Tetromino, tetrominoBag } from './tetrominos.js'
+
 import './style.css'
-import { board } from './board.js'
+import { Game } from './game.js'
 
 const canvas = document.querySelector('canvas')
 const context = canvas.getContext('2d')
@@ -8,17 +8,13 @@ const context = canvas.getContext('2d')
 const blockSize = 30
 const width = 10
 const height = 20
-
+// configuracion del canvas
 canvas.width = width * blockSize
 canvas.height = height * blockSize
-
-
 context.scale(blockSize, blockSize)
-const gameBoard = new board(height, width, context);
-gameBoard.draw();
-const bag = new tetrominoBag();
-const tetromino = new Tetromino(bag.getNextTetromino(), context, canvas);
-tetromino.draw();
+
+const game = new Game(context, canvas, width, height)
+game.update()
 
 /* const actualPiece={
   'position' : {x:0,y:0},

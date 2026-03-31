@@ -1,3 +1,5 @@
+import { TETROMINO_TYPES } from './tetrominoType.js';
+import { Tetromino } from './tetrominos.js';
 export class board {
     constructor(height, width, context) {
         this.height = height;
@@ -13,61 +15,91 @@ export class board {
 
     }
     drawSquere(x, y, color, borderColor) {
-
         this.context.fillStyle = color;
         this.context.fillRect(x, y, 1, 1);
         this.context.strokeStyle = borderColor;
         this.context.lineWidth = 0.05;
-
         this.context.lineJoin = 'round ';
         this.context.strokeRect(x, y, 1, 1);
-
     }
-    draw() {
 
+    drawBlock(x, y, typeInfo) {
+        // Highlight Triangle
+        this.context.fillStyle = typeInfo.highlight;
+        this.context.beginPath();
+        this.context.moveTo(x, y);
+        this.context.lineTo(x + 1, y);
+        this.context.lineTo(x, y + 1);
+        this.context.closePath();
+        this.context.fill();
+
+        // Shadow Triangle
+        this.context.fillStyle = typeInfo.shadow;
+        this.context.beginPath();
+        this.context.moveTo(x, y + 1);
+        this.context.lineTo(x + 1, y + 1);
+        this.context.lineTo(x + 1, y);
+        this.context.closePath();
+        this.context.fill();
+
+        // Main Square
+        this.context.fillStyle = typeInfo.mainColor;
+        this.context.fillRect(x + 0.1, y + 0.1, 0.8, 0.8);
+    }
+
+    draw() {
         this.context.fillStyle = 'black';
         this.context.fillRect(0, 0, this.width, this.height);
 
-
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                this.drawSquere(x, y, 'black', 'white');
+                const cell = this.grid[y][x];
+                if (cell === 0) {
+                    this.drawSquere(x, y, 'black', '#333');
+                } else {
+                    const typeInfo = TETROMINO_TYPES[cell];
+                    if (typeInfo) {
+                        this.drawBlock(x, y, typeInfo);
+                    }
+                }
             }
-
         }
     }
     isInside(x, y) {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
-    checkCollision(x, y) {
-        return !this.isInside(x, y) || this.grid[y][x] !== 0;
+    checkCollision(tetromino) {
+        return tetromino.getShape().some(pos => {
+            const x = tetromino.position.x + pos.x;
+            const y = tetromino.position.y + pos.y;
+            return !this.isInside(x, y) || this.grid[y][x] !== 0;
+        });
     }
+
     isRowFull(y) {
         return this.grid[y].every(cell => cell !== 0);
     }
-    isEmptyRow(y) {
-        return this.grid[y].every(cell => cell === 0);
-    }
-    clearRow(y) {
-        this.grid[y].fill(0);
-    }
-    moveRowsDown(count, startY) {
-        for (let y = startY + 1; y > count + startY; y++) {
-            this.grid[y].splice(y, 1);
-            this.grid[y].unshift(0);
-        }
-    }
+
     collapseRows() {
-        let y = this.height - 1;
-        let contador = 0;
-        while (!this.isEmptyRow(y) && (y >= 0)) {
+        let rowsCleared = 0;
+        for (let y = this.height - 1; y >= 0; y--) {
             if (this.isRowFull(y)) {
-                this.clearRow(y);
-                contador++;
-            } else if (contador > 0) {
-                this.moveRowsDown(contador, y);
+                // Elimina la fila completa
+                this.grid.splice(y, 1);
+                // Agrega una fila vacía en la parte superior
+                this.grid.unshift(Array(this.width).fill(0));
+                rowsCleared++;
+                // Vuelve a revisar la misma posición 'y' ya que las filas bajaron
+                y++;
             }
-            y--;
         }
+        return rowsCleared;
+    }
+    solidifyPiece(tetromino) {
+        tetromino.getShape().forEach(pos => {
+            const x = tetromino.position.x + pos.x;
+            const y = tetromino.position.y + pos.y;
+            this.grid[y][x] = tetromino.type;
+        });
     }
 }
