@@ -1,6 +1,6 @@
 import { board } from './board.js'
 import { Tetromino, tetrominoBag } from './tetrominos.js'
-
+import { SCORE_PER_LINE } from './ScorePerLine.js'
 export class Game {
     constructor(context, canvas, width, height) {
         this.context = context;
@@ -16,8 +16,17 @@ export class Game {
         this.dropInterval = 1000;
         this.lastTime = 0;
         this.isGameOver = false;
+        this.score = 0;
+        this.linesCleared = 0;
+        this.totalLines = 0;
+        this.level = 1;
+        this.combo = 0;
+        this.bonus = 0;
+        this.lasActionWasRotation = false
+
 
         this.initControls();
+        this.updateUI();
     }
 
     initControls() {
@@ -38,8 +47,11 @@ export class Game {
                     }
                     break;
                 case 'ArrowDown':
-                    this.dropPiece();
+                    if (this.dropPiece()) {
+                        this.bonus += 1;
+                    }
                     break;
+                case 'ArrowUp':
                 case 'z':
                 case 'Z':
                     this.tetromino.savePosition();
@@ -72,6 +84,10 @@ export class Game {
                         this.tetromino.restorePosition();
                     }
                     break;
+                case ' ':
+                    this.hardDrop();
+                    break;
+
             }
         });
     }
@@ -86,13 +102,29 @@ export class Game {
 
     dropPiece() {
         this.tetromino.moveDown();
+        this.dropCounter = 0;
         if (this.checkCollision()) {
             this.tetromino.moveUp();
             this.solidify();
-            this.board.collapseRows();
+            this.linesCleared = this.board.collapseRows();
+            this.totalLines += this.linesCleared;
+            this.updateScore();
             this.spawnNewPiece();
+            return false;
         }
-        this.dropCounter = 0;
+        return true;
+    }
+    hardDrop() {
+        while (this.dropPiece()) {
+            this.bonus += 2;
+        }
+    }
+
+    tSpin() {
+        if (this.lasActionWasRotation && this.tetromino.type === 'T') {
+            return (this.board.checkDiagonalCollision(this.tetromino.position) >= 3) ? true : false;
+        }
+        return false;
     }
 
     spawnNewPiece() {
@@ -101,10 +133,38 @@ export class Game {
             this.isGameOver = true;
             alert('¡Game Over!');
             this.board.grid = this.board.createBoard();
+            this.score = 0;
+            this.totalLines = 0;
+            this.level = 1;
+            this.updateUI();
             this.isGameOver = false;
         }
     }
+    updateScore() {
+        if (this.linesCleared > 0) {
+            this.score += SCORE_PER_LINE[this.linesCleared - 1] * this.level
+                + this.combo * 60 * this.level
+                + this.bonus;
+            this.combo++;
+            this.bonus = 0;
+            this.level = Math.floor(this.totalLines / 10) + 1;
+            this.dropInterval = 1000 - (this.level - 1) * 100;
+            if (this.dropInterval < 100) this.dropInterval = 100;
+            this.linesCleared = 0;
+            this.updateUI();
+        } else {
+            this.combo = 0;
+        }
+    }
 
+    updateUI() {
+        const scoreElement = document.getElementById('score');
+        const linesElement = document.getElementById('lines');
+        const levelElement = document.getElementById('level');
+        if (scoreElement) scoreElement.innerText = this.score;
+        if (linesElement) linesElement.innerText = this.totalLines;
+        if (levelElement) levelElement.innerText = this.level;
+    }
     // El Game Loop principal, "time" lo provee automáticamente requestAnimationFrame
     update(time = 0) {
         if (!this.isGameOver) {

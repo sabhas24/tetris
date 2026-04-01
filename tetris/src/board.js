@@ -65,6 +65,29 @@ export class board {
             }
         }
     }
+
+    checkDiagonalCollision(position) {
+        const corners = [
+            { cx: position.x + 0, cy: position.y + 0 }, // Arriba - Izquierda
+            { cx: position.x + 2, cy: position.y + 0 }, // Arriba - Derecha
+            { cx: position.x + 0, cy: position.y + 2 }, // Abajo - Izquierda
+            { cx: position.x + 2, cy: position.y + 2 }  // Abajo - Derecha
+        ];
+
+        let occupiedCorners = 0;
+
+        for (let i = 0; i < corners.length; i++) {
+            const x = corners[i].cx;
+            const y = corners[i].cy;
+
+            if (!this.isInside(x, y) || this.grid[y][x] !== 0) {
+                occupiedCorners++;
+            }
+        }
+
+        return occupiedCorners;
+    }
+
     isInside(x, y) {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
