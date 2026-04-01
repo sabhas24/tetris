@@ -118,6 +118,9 @@ export class board {
         }
         return rowsCleared;
     }
+    isEmptyBoard() {
+        return this.grid.every(row => row.every(cell => cell === 0));
+    }
     solidifyPiece(tetromino) {
         tetromino.getShape().forEach(pos => {
             const x = tetromino.position.x + pos.x;

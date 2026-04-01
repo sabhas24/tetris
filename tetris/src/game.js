@@ -11,6 +11,7 @@ export class Game {
         this.board = new board(height, width, context);
         this.bag = new tetrominoBag();
         this.tetromino = new Tetromino(this.bag.getNextTetromino(), context, canvas);
+        this.pause = false;
 
         this.dropCounter = 0;
         this.dropInterval = 1000;
@@ -23,7 +24,7 @@ export class Game {
         this.combo = 0;
         this.bonus = 0;
         this.lasActionWasRotation = false
-
+        this.b2b = false;
 
         this.initControls();
         this.updateUI();
@@ -35,18 +36,21 @@ export class Game {
 
             switch (event.key) {
                 case 'ArrowLeft':
+                    this.lasActionWasRotation = false;
                     this.tetromino.moveLeft();
                     if (this.checkCollision(this.tetromino)) {
                         this.tetromino.moveRight();
                     }
                     break;
                 case 'ArrowRight':
+                    this.lasActionWasRotation = false;
                     this.tetromino.moveRight();
                     if (this.checkCollision(this.tetromino)) {
                         this.tetromino.moveLeft();
                     }
                     break;
                 case 'ArrowDown':
+                    this.lasActionWasRotation = false;
                     if (this.dropPiece()) {
                         this.bonus += 1;
                     }
@@ -55,6 +59,7 @@ export class Game {
                 case 'z':
                 case 'Z':
                     this.tetromino.savePosition();
+                    this.lasActionWasRotation = true;
                     this.tetromino.rotationLeft();
 
                     let indexZ = 0;
@@ -71,6 +76,7 @@ export class Game {
                 case 'x':
                 case 'X':
                     this.tetromino.savePosition();
+                    this.lasActionWasRotation = true;
                     this.tetromino.rotationRigth();
 
                     let indexX = 0;
@@ -86,6 +92,11 @@ export class Game {
                     break;
                 case ' ':
                     this.hardDrop();
+                    break;
+                case 'Escape':
+                case 'p':
+                case 'P':
+                    this.pause = !this.pause;
                     break;
 
             }
@@ -107,6 +118,7 @@ export class Game {
             this.tetromino.moveUp();
             this.solidify();
             this.linesCleared = this.board.collapseRows();
+
             this.totalLines += this.linesCleared;
             this.updateScore();
             this.spawnNewPiece();
@@ -121,10 +133,9 @@ export class Game {
     }
 
     tSpin() {
-        if (this.lasActionWasRotation && this.tetromino.type === 'T') {
-            return (this.board.checkDiagonalCollision(this.tetromino.position) >= 3) ? true : false;
-        }
-        return false;
+
+        return (this.board.checkDiagonalCollision(this.tetromino.position) >= 3
+            && this.lasActionWasRotation && this.tetromino.type === 'T')
     }
 
     spawnNewPiece() {
@@ -141,20 +152,40 @@ export class Game {
         }
     }
     updateScore() {
+        let points = 0;
+        let isDifficult = this.tSpin() || this.linesCleared === 4;
+
+        points += this.tSpin() ? 800 * this.level : 0;
         if (this.linesCleared > 0) {
-            this.score += SCORE_PER_LINE[this.linesCleared - 1] * this.level
-                + this.combo * 60 * this.level
-                + this.bonus;
+            points += SCORE_PER_LINE[this.linesCleared - 1] * this.level;
+        }
+
+        if (isDifficult && this.b2b) points = Math.floor(points * 1.5);
+        if (this.linesCleared > 0) this.b2b = isDifficult;
+        if (this.board.isEmptyBoard()) points += 2000;
+        points += this.combo * 60 * this.level;
+        points += this.bonus;
+        this.bonus = 0;
+
+        if (this.linesCleared > 0) {
             this.combo++;
-            this.bonus = 0;
-            this.level = Math.floor(this.totalLines / 10) + 1;
-            this.dropInterval = 1000 - (this.level - 1) * 100;
-            if (this.dropInterval < 100) this.dropInterval = 100;
+            if (this.totalLines % 10 === 0) {
+                this.levelup();
+            }
             this.linesCleared = 0;
             this.updateUI();
         } else {
             this.combo = 0;
         }
+        this.score += points;
+
+    }
+    levelup() {
+        this.level++;
+        if (this.level < 20) {
+            this.dropInterval = 1000 - (this.level - 1) * 50;
+        }
+        this.totalLines = 0;
     }
 
     updateUI() {
@@ -165,9 +196,9 @@ export class Game {
         if (linesElement) linesElement.innerText = this.totalLines;
         if (levelElement) levelElement.innerText = this.level;
     }
-    // El Game Loop principal, "time" lo provee automáticamente requestAnimationFrame
+    // Game Loop principal
     update(time = 0) {
-        if (!this.isGameOver) {
+        if (!this.isGameOver && !this.pause) {
             const deltaTime = time - this.lastTime;
             this.lastTime = time;
 
