@@ -1,17 +1,25 @@
 import { board } from './board.js'
 import { Tetromino, tetrominoBag } from './tetrominos.js'
 import { SCORE_PER_LINE } from './ScorePerLine.js'
+import { NextPieceDisplay } from './nextPieceDisplay.js'
 export class Game {
-    constructor(context, canvas, width, height) {
+    constructor(context, canvas, width, height, nextContext, nextCanvas) {
         this.context = context;
         this.canvas = canvas;
         this.width = width;
         this.height = height;
+        this.nextContext = nextContext;
+        this.nextCanvas = nextCanvas;
 
         this.board = new board(height, width, context);
         this.bag = new tetrominoBag();
         this.tetromino = new Tetromino(this.bag.getNextTetromino(), context, canvas);
         this.pause = false;
+
+        this.nextPieceDisplay = new NextPieceDisplay(nextContext, nextCanvas);
+        this.nextPieceType = this.bag.getNextTetromino();
+        this.nextPieceDisplay.setNextPiece(this.nextPieceType);
+
 
         this.dropCounter = 0;
         this.dropInterval = 1000;
@@ -28,6 +36,11 @@ export class Game {
 
         this.initControls();
         this.updateUI();
+
+        // Botón de jugar de nuevo
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            this.restartGame();
+        });
     }
 
     initControls() {
@@ -96,7 +109,14 @@ export class Game {
                 case 'Escape':
                 case 'p':
                 case 'P':
+                    if (this.isGameOver) return;
                     this.pause = !this.pause;
+                    const pauseMenu = document.getElementById('pause-menu');
+                    if (this.pause) {
+                        pauseMenu.classList.remove('hidden');
+                    } else {
+                        pauseMenu.classList.add('hidden');
+                    }
                     break;
 
             }
@@ -139,17 +159,33 @@ export class Game {
     }
 
     spawnNewPiece() {
-        this.tetromino = new Tetromino(this.bag.getNextTetromino(), this.context, this.canvas);
+        this.tetromino = new Tetromino(this.nextPieceType, this.context, this.canvas);
+        this.nextPieceType = this.bag.getNextTetromino();
+        this.nextPieceDisplay.setNextPiece(this.nextPieceType);
+
         if (this.checkCollision()) {
             this.isGameOver = true;
-            alert('¡Game Over!');
-            this.board.grid = this.board.createBoard();
-            this.score = 0;
-            this.totalLines = 0;
-            this.level = 1;
-            this.updateUI();
-            this.isGameOver = false;
+            document.getElementById('final-score').innerText = this.score;
+            document.getElementById('game-over-menu').classList.remove('hidden');
         }
+    }
+
+    restartGame() {
+        document.getElementById('game-over-menu').classList.add('hidden');
+        this.board.grid = this.board.createBoard();
+        this.score = 0;
+        this.totalLines = 0;
+        this.level = 1;
+        this.combo = 0;
+        this.bonus = 0;
+        this.updateUI();
+
+        this.tetromino = new Tetromino(this.bag.getNextTetromino(), this.context, this.canvas);
+        this.nextPieceType = this.bag.getNextTetromino();
+        this.nextPieceDisplay.setNextPiece(this.nextPieceType);
+        
+        this.isGameOver = false;
+        this.lastTime = performance.now();
     }
     updateScore() {
         let points = 0;
@@ -198,11 +234,10 @@ export class Game {
     }
     // Game Loop principal
     update(time = 0) {
+        const deltaTime = time - this.lastTime;
+        this.lastTime = time;
+
         if (!this.isGameOver && !this.pause) {
-            const deltaTime = time - this.lastTime;
-            this.lastTime = time;
-
-
             this.dropCounter += deltaTime;
 
             if (this.dropCounter > this.dropInterval) {
@@ -218,5 +253,7 @@ export class Game {
     draw() {
         this.board.draw();
         this.tetromino.draw();
+
+        this.nextPieceDisplay.draw();
     }
 }
